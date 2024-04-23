@@ -7,6 +7,7 @@ __pycache__/
 bot_env/
 shared_env/
 function_env
+logs/
 
 # C extensions
 *.so
