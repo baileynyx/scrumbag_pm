@@ -1,0 +1,8 @@
+aiohttp
+azure-ai-language-conversations
+botbuilder-core
+botbuilder-integration-aiohttp
+pyjwt
+pytest
+pytest-asyncio
+requests
