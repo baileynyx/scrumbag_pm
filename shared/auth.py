@@ -18,13 +18,13 @@ def get_access_token():
         'scope': 'https://graph.microsoft.com/.default',
     }
 
-    log_debug_info('Attempting to retrieve access token', url=url)
+    log_debug_info('Attempting to retrieve access token')
 
     try:
         response = requests.post(url, headers=headers, data=body)
         response.raise_for_status()  # Raises HTTPError for bad responses
         access_token = response.json()['access_token']
-        log_message('info', 'Access Token Retrieved Successfully')
+        log_message('info', 'Successfully authenticated with Azure.')
         return access_token
     except requests.exceptions.HTTPError as e:
         log_message(
@@ -46,6 +46,7 @@ def get_access_token():
 if __name__ == '__main__':
     try:
         token = get_access_token()
-        log_message('info', f'Access Token: {token}')
+        # For security reasons, avoid logging the actual token
+        log_message('info', 'Access token retrieved and available for use.')
     except Exception as e:
         log_message('error', str(e))
