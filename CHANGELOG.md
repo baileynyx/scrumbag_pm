@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/baileynyx/scrumbag_pm/compare/v1.0.0...v1.1.0) (2024-04-23)
+
+
+### Features
+
+* shared module ([dd1002c](https://github.com/baileynyx/scrumbag_pm/commit/dd1002cd3f0c8bb7e9b329ab76bfe9bc80462d58))
+
 # 1.0.0 (2024-04-23)
 
 
