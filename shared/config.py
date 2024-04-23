@@ -22,7 +22,7 @@ def get_secret(secret_name):
         secret_value = client.get_secret(secret_name).value
         log_debug_info(
             'Secret retrieved successfully',
-            secret_name=secret_name, secret_value=secret_value,
+            secret_name=secret_name,
         )
         return secret_value
     except Exception as e:
@@ -31,10 +31,9 @@ def get_secret(secret_name):
                 secret_name
             }: {str(e)}",
         )
-        raise Exception(f"Failed to retrieve secret {secret_name}: {str(e)}")
+        raise
 
 
-# Using dashes as Azure Key Vault does not allow underscores in secret names
 CLIENT_ID = get_secret('AZURE-CLIENT-ID')
 CLIENT_SECRET = get_secret('AZURE-CLIENT-SECRET')
 TENANT_ID = get_secret('AZURE-TENANT-ID')

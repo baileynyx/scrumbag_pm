@@ -18,19 +18,29 @@ def get_access_token():
         'scope': 'https://graph.microsoft.com/.default',
     }
 
-    # Log the attempt to retrieve the access token
-    log_debug_info('Attempting to retrieve access token', url=url, body=body)
+    log_debug_info('Attempting to retrieve access token', url=url)
 
-    response = requests.post(url, headers=headers, data=body)
-    if response.status_code == 200:
+    try:
+        response = requests.post(url, headers=headers, data=body)
+        response.raise_for_status()  # Raises HTTPError for bad responses
+        access_token = response.json()['access_token']
         log_message('info', 'Access Token Retrieved Successfully')
-        return response.json()['access_token']
-    else:
-        error_message = f"Failed to retrieve access token: {
-            response.status_code
-        } {response.text}"
-        log_message('error', error_message)
-        raise Exception(error_message)
+        return access_token
+    except requests.exceptions.HTTPError as e:
+        log_message(
+            'error', f'HTTP error occurred: {
+                e.response.status_code
+            } - {e.response.reason}',
+        )
+        raise
+    except requests.exceptions.RequestException as e:
+        log_message('error', f'Error during requests to OAuth endpoint: {e}')
+        raise
+    except KeyError:
+        log_message(
+            'error', 'Unexpected response structure from OAuth endpoint.',
+        )
+        raise
 
 
 if __name__ == '__main__':
