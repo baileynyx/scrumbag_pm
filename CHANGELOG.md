@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/baileynyx/scrumbag_pm/compare/v1.1.0...v1.2.0) (2024-04-25)
+
+
+### Features
+
+* basic echo bot ([44c195d](https://github.com/baileynyx/scrumbag_pm/commit/44c195d052f40a93e9005f096c898b576f3b0b48))
+
 # [1.1.0](https://github.com/baileynyx/scrumbag_pm/compare/v1.0.0...v1.1.0) (2024-04-23)
 
 
