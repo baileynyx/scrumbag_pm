@@ -1,8 +1,13 @@
 aiohttp
 azure-ai-language-conversations
+azure-core-exceptions
+azure-identity
+azure-keyvault-secrets
 botbuilder-core
 botbuilder-integration-aiohttp
+flask
 pyjwt
 pytest
 pytest-asyncio
+python-dotenv
 requests

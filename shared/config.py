@@ -52,8 +52,8 @@ def get_secret(secret_name: str) -> str:
 CLIENT_ID = get_secret('AZURE-CLIENT-ID')
 CLIENT_SECRET = get_secret('AZURE-CLIENT-SECRET')
 TENANT_ID = get_secret('AZURE-TENANT-ID')
-APP_ID = get_secret('APP-ID')
-APP_PASSWORD = get_secret('APP-PASSWORD')
+MICROSOFT_APP_ID = get_secret('APP-ID')
+MICROSOFT_APP_PASSWORD = get_secret('APP-PASSWORD')
 CLU_ENDPOINT = get_secret('CLU-ENDPOINT')
 CLU_SECRET = get_secret('CLU-SECRET')
 # ... add any other secrets here as needed
