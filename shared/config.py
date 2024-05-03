@@ -6,7 +6,9 @@ from azure.core.exceptions import ClientAuthenticationError
 from azure.core.exceptions import HttpResponseError
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from utils import log_message
+
+from .utils import log_message
+
 
 # Key Vault setup
 key_vault_name = os.getenv('AZURE_KEY_VAULT_NAME')
@@ -56,4 +58,5 @@ MICROSOFT_APP_ID = get_secret('APP-ID')
 MICROSOFT_APP_PASSWORD = get_secret('APP-PASSWORD')
 CLU_ENDPOINT = get_secret('CLU-ENDPOINT')
 CLU_SECRET = get_secret('CLU-SECRET')
+CLU_PROJECT_NAME = get_secret('CLU-PROJECT-NAME')
 # ... add any other secrets here as needed

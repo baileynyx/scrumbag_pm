@@ -10,7 +10,7 @@ from quart import Quart
 from quart import request
 from quart import Response
 
-from bot import EchoBot
+from bot import scrumbag_bot
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,7 @@ SETTINGS = BotFrameworkAdapterSettings(
 ADAPTER = AdapterWithErrorHandler(SETTINGS)
 
 # Create an instance of the EchoBot
-BOT = EchoBot()
+BOT = scrumbag_bot()
 
 
 @app.route('/api/messages', methods=['POST'])
