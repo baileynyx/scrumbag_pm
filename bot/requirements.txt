@@ -9,5 +9,6 @@ flask
 pyjwt
 pytest
 pytest-asyncio
+python-decouple
 python-dotenv
 requests
