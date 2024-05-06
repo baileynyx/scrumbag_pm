@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/baileynyx/scrumbag_pm/compare/v1.2.0...v1.3.0) (2024-05-03)
+
+
+### Features
+
+* Integrate NLP ([1164c23](https://github.com/baileynyx/scrumbag_pm/commit/1164c23266cb30e73e73657fc100c44772dda4ad))
+
 # [1.2.0](https://github.com/baileynyx/scrumbag_pm/compare/v1.1.0...v1.2.0) (2024-04-25)
 
 
