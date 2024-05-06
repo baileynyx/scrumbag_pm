@@ -1,62 +1,59 @@
 from __future__ import annotations
 
-import os
+import logging
+from http import HTTPStatus
 
-from azure.core.exceptions import ClientAuthenticationError
-from azure.core.exceptions import HttpResponseError
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
+from adapter import AdapterWithErrorHandler
+from botbuilder.core import BotFrameworkAdapterSettings
+from botbuilder.schema import Activity
+from quart import jsonify
+from quart import Quart
+from quart import request
+from quart import Response
 
-from .utils import log_message
+from bot import scrumbag_bot
+from shared.config import MICROSOFT_APP_ID
+from shared.config import MICROSOFT_APP_PASSWORD
+from shared.utils import log_message
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# Key Vault setup
-key_vault_name = os.getenv('AZURE_KEY_VAULT_NAME')
-if not key_vault_name:
-    log_message('error', 'AZURE_KEY_VAULT_NAME environment variable not set.')
-    raise OSError('AZURE_KEY_VAULT_NAME environment variable not set.')
-key_vault_url = f"https://{key_vault_name}.vault.azure.net/"
+app = Quart(__name__)  # Using Quart instead of Flask
 
-# Azure Credentials
-credential = DefaultAzureCredential()
-client = SecretClient(vault_url=key_vault_url, credential=credential)
+# Initialize settings and adapter using shared config
+SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
+ADAPTER = AdapterWithErrorHandler(SETTINGS)
 
+# Create an instance of the bot
+BOT = scrumbag_bot()
 
-def get_secret(secret_name: str) -> str:
+@app.route('/api/messages', methods=['POST'])
+async def messages():
+    if 'application/json' not in request.headers['Content-Type']:
+        logger.error('Received non-JSON content type')
+        return Response('Unsupported media type', status=HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+
     try:
-        # For security reasons, consider commenting out the below log in a production environment
-        # log_message('info', f"Retrieving secret: {secret_name}")
-        return client.get_secret(secret_name).value
-    except HttpResponseError as http_error:
-        log_message(
-            'error', f"HTTP error occurred while retrieving secret {
-                secret_name
-            }: {http_error.message}",
-        )
-        raise
-    except ClientAuthenticationError as auth_error:
-        log_message(
-            'error', f"Authentication error occurred while retrieving secret {
-                secret_name
-            }: {auth_error.message}",
-        )
-        raise
+        body = await request.get_json()  # Asynchronously get JSON data
+        logger.info(f"Processing message with body: {body}")
+
+        activity = Activity().deserialize(body)
+        auth_header = request.headers.get('Authorization', '')
+
+        await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
+        logger.info('Request processed successfully')
+        return Response('Handled', status=HTTPStatus.CREATED)
+    except KeyError as e:
+        logger.exception('Key error in processing the request', exc_info=True)
+        return Response(f'Key error: {str(e)}', status=HTTPStatus.BAD_REQUEST)
+    except ValueError as e:
+        logger.exception('Value error in processing the request', exc_info=True)
+        return Response(f'Value error: {str(e)}', status=HTTPStatus.BAD_REQUEST)
     except Exception as e:
-        log_message(
-            'error', f"Unexpected error occurred while retrieving secret {
-                secret_name
-            }: {e}",
-        )
-        raise
+        logger.exception('Failed to process message', exc_info=True)
+        return Response('Internal server error', status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
-
-# Fetch and set all the necessary secrets as global variables
-CLIENT_ID = get_secret('AZURE-CLIENT-ID')
-CLIENT_SECRET = get_secret('AZURE-CLIENT-SECRET')
-TENANT_ID = get_secret('AZURE-TENANT-ID')
-MICROSOFT_APP_ID = get_secret('APP-ID')
-MICROSOFT_APP_PASSWORD = get_secret('APP-PASSWORD')
-CLU_ENDPOINT = get_secret('CLU-ENDPOINT')
-CLU_SECRET = get_secret('CLU-SECRET')
-CLU_PROJECT_NAME = get_secret('CLU-PROJECT-NAME')
-# ... add any other secrets here as needed
+if __name__ == '__main__':
+    app.run(debug=False, port=3978, use_reloader=False)
