@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.0...v1.3.1) (2024-05-07)
+
+
+### Bug Fixes
+
+* app.py ([73de8d8](https://github.com/baileynyx/scrumbag_pm/commit/73de8d8dd64fb53f015200606b5a2426728e6e5d))
+
 # [1.3.0](https://github.com/baileynyx/scrumbag_pm/compare/v1.2.0...v1.3.0) (2024-05-03)
 
 
