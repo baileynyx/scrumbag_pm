@@ -1,33 +1,27 @@
+# app.py
 from __future__ import annotations
 
-import logging
 from http import HTTPStatus
 
 from adapter import AdapterWithErrorHandler
 from botbuilder.core import BotFrameworkAdapterSettings
-from botbuilder.schema import Activity
 from quart import jsonify
 from quart import Quart
 from quart import request
 from quart import Response
 
-from bot import scrumbag_bot
+from bot import scrumbag_bot  # Make sure this import doesn't trigger further imports that circle back
 from shared.config import MICROSOFT_APP_ID
 from shared.config import MICROSOFT_APP_PASSWORD
-from shared.utils import log_message
+
+app = Quart(__name__)
+SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
+ADAPTER = AdapterWithErrorHandler(SETTINGS)
+BOT = scrumbag_bot(SETTINGS)  # Pass SETTINGS or individual ID and PASSWORD
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = Quart(__name__)  # Using Quart instead of Flask
-
-# Initialize settings and adapter using shared config
-SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
-ADAPTER = AdapterWithErrorHandler(SETTINGS)
-
-# Create an instance of the bot
-BOT = scrumbag_bot()
 
 @app.route('/api/messages', methods=['POST'])
 async def messages():
