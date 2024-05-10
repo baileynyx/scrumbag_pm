@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.1...v1.3.2) (2024-05-10)
+
+
+### Bug Fixes
+
+* circular reference ([4fc10b6](https://github.com/baileynyx/scrumbag_pm/commit/4fc10b64a280ffc79f17f3e16e6355eba5224baf))
+
 ## [1.3.1](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.0...v1.3.1) (2024-05-07)
 
 
