@@ -1,6 +1,6 @@
 aiohttp
 azure-ai-language-conversations
-azure-core-exceptions
+azure-core
 azure-identity
 azure-keyvault-secrets
 botbuilder-core
@@ -11,4 +11,5 @@ pytest
 pytest-asyncio
 python-decouple
 python-dotenv
+quart
 requests

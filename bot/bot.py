@@ -7,14 +7,13 @@ from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 
-from shared.config import CLU_ENDPOINT, CLU_SECRET, CLU_PROJECT_NAME  # Import the config
-from shared.utils import log_message, log_debug_info  # Import the logging utilities
+# Import the config
+from shared.config import CLU_ENDPOINT, CLU_SECRET, CLU_PROJECT_NAME
+from shared.utils import log_message, log_debug_info
 
 import logging
 from botbuilder.core import ActivityHandler, MessageFactory, TurnContext
 import requests  # Import requests to make HTTP calls to the CLU service
-from shared.config import CLU_ENDPOINT, CLU_SECRET, CLU_PROJECT_NAME  # Import the config
-from shared.utils import log_message, log_debug_info  # Import the logging utilities
 
 # Configure logger for EnhancedBot using the shared utility logger
 logger = logging.getLogger('EnhancedBotLogger')
@@ -34,7 +33,7 @@ async def query_clu(text: str):
     log_debug_info('Sending request to CLU', endpoint=endpoint_url, project_name=CLU_PROJECT_NAME)
     response = requests.post(endpoint_url, json=body, headers=headers)
     log_message('info', f"Received CLU response: {response.json()}")
-    return response.json()  # Parse the JSON response
+    return response.json()
 
 class scrumbag_bot(ActivityHandler):
     async def on_message_activity(self, turn_context: TurnContext):
@@ -61,3 +60,6 @@ class scrumbag_bot(ActivityHandler):
             log_message('info', f"Sent response: {response_text}")
         except Exception as e:
             log_message('error', f"Error sending activity: {str(e)}", exc_info=True)
+
+if __name__ == '__main__':
+    app.run(debug=False, port=3978, use_reloader=False)

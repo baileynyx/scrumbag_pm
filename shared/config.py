@@ -11,7 +11,6 @@ from quart import Quart
 from quart import request
 from quart import Response
 
-from bot import scrumbag_bot
 from shared.config import MICROSOFT_APP_ID
 from shared.config import MICROSOFT_APP_PASSWORD
 from shared.utils import log_message
@@ -27,7 +26,7 @@ SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
 ADAPTER = AdapterWithErrorHandler(SETTINGS)
 
 # Create an instance of the bot
-BOT = scrumbag_bot()
+from bot import scrumbag_bot  # Import here to avoid circular imports
 
 @app.route('/api/messages', methods=['POST'])
 async def messages():
@@ -42,7 +41,7 @@ async def messages():
         activity = Activity().deserialize(body)
         auth_header = request.headers.get('Authorization', '')
 
-        await ADAPTER.process_activity(activity, auth_header, BOT.on_turn)
+        await ADAPTER.process_activity(activity, auth_header, scrumbag_bot.on_turn)
         logger.info('Request processed successfully')
         return Response('Handled', status=HTTPStatus.CREATED)
     except KeyError as e:
