@@ -1,20 +1,36 @@
 from __future__ import annotations
 
 import requests
-from config import CLIENT_ID
-from config import CLIENT_SECRET
-from config import TENANT_ID
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 from utils import log_debug_info
 from utils import log_message
 
+# Initialize the Azure Key Vault client
+key_vault_url = 'https://<your-key-vault-name>.vault.azure.net/'
+credential = DefaultAzureCredential()
+client = SecretClient(vault_url=key_vault_url, credential=credential)
+
+def get_secret(secret_name: str) -> str:
+    try:
+        retrieved_secret = client.get_secret(secret_name)
+        log_message('info', f'Successfully retrieved {secret_name}')
+        return retrieved_secret.value
+    except Exception as e:
+        log_message('error', f'Failed to retrieve {secret_name}: {str(e)}')
+        raise
 
 def get_access_token():
-    url = f"https://login.microsoftonline.com/{TENANT_ID}/oauth2/v2.0/token"
+    tenant_id = get_secret('azure-tenant-id')
+    client_id = get_secret('azure-client-id')
+    client_secret = get_secret('azure-client-secret')
+
+    url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     body = {
         'grant_type': 'client_credentials',
-        'client_id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
+        'client_id': client_id,
+        'client_secret': client_secret,
         'scope': 'https://graph.microsoft.com/.default',
     }
 
@@ -28,20 +44,15 @@ def get_access_token():
         return access_token
     except requests.exceptions.HTTPError as e:
         log_message(
-            'error', f'HTTP error occurred: {
-                e.response.status_code
-            } - {e.response.reason}',
+            'error', f'HTTP error occurred: {e.response.status_code} - {e.response.reason}', exc_info=True
         )
         raise
     except requests.exceptions.RequestException as e:
-        log_message('error', f'Error during requests to OAuth endpoint: {e}')
+        log_message('error', f'Error during requests to OAuth endpoint: {str(e)}', exc_info=True)
         raise
     except KeyError:
-        log_message(
-            'error', 'Unexpected response structure from OAuth endpoint.',
-        )
+        log_message('error', 'Unexpected response structure from OAuth endpoint.')
         raise
-
 
 if __name__ == '__main__':
     try:

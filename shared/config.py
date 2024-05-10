@@ -6,27 +6,33 @@ from http import HTTPStatus
 from adapter import AdapterWithErrorHandler
 from botbuilder.core import BotFrameworkAdapterSettings
 from botbuilder.schema import Activity
-from quart import jsonify
 from quart import Quart
 from quart import request
 from quart import Response
 
-from shared.config import MICROSOFT_APP_ID
-from shared.config import MICROSOFT_APP_PASSWORD
-from shared.utils import log_message
+from .auth import get_secret  # Adjusted import statement to relative import
+from .utils import log_debug_info
+from .utils import log_message
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Retrieve secrets from Azure Key Vault
+MICROSOFT_APP_ID = get_secret('MICROSOFT_APP_ID')
+MICROSOFT_APP_PASSWORD = get_secret('MICROSOFT_APP_PASSWORD')
+CLU_ENDPOINT = get_secret('CLU_ENDPOINT')
+CLU_SECRET = get_secret('CLU_SECRET')
+CLU_PROJECT_NAME = get_secret('CLU_PROJECT_NAME')
+
 app = Quart(__name__)  # Using Quart instead of Flask
 
-# Initialize settings and adapter using shared config
+# Initialize settings and adapter using configuration constants
 SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
 ADAPTER = AdapterWithErrorHandler(SETTINGS)
 
-# Create an instance of the bot
-from bot import scrumbag_bot  # Import here to avoid circular imports
+# Dynamically import to avoid circular imports
+from bot import scrumbag_bot
 
 @app.route('/api/messages', methods=['POST'])
 async def messages():

@@ -7,7 +7,7 @@ from pathlib import Path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 
-# Import the config
+# Import configurations directly to avoid circular imports
 from shared.config import CLU_ENDPOINT, CLU_SECRET, CLU_PROJECT_NAME
 from shared.utils import log_message, log_debug_info
 
