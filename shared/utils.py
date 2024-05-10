@@ -9,12 +9,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 def ensure_dir(file_path):
     directory = os.path.dirname(file_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
-
 
 DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
@@ -72,7 +70,6 @@ def log_debug_info(message, **kwargs):
         ]
     }
     details = ', '.join(
-        f'{key}={value}' for key,
-        value in filtered_kwargs.items()
+        f'{key}={value}' for key, value in filtered_kwargs.items()
     )
     logger.debug(f"{message} - {details}")

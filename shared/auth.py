@@ -3,8 +3,10 @@ from __future__ import annotations
 import requests
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from utils import log_debug_info
-from utils import log_message
+
+from .utils import log_debug_info
+from .utils import log_message
+
 
 # Initialize the Azure Key Vault client
 key_vault_url = 'https://<your-key-vault-name>.vault.azure.net/'

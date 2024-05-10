@@ -14,6 +14,7 @@ from .auth import get_secret  # Adjusted import statement to relative import
 from .utils import log_debug_info
 from .utils import log_message
 
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
