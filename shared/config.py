@@ -3,9 +3,6 @@ from __future__ import annotations
 import logging
 from http import HTTPStatus
 
-from adapter import AdapterWithErrorHandler
-from botbuilder.core import BotFrameworkAdapterSettings
-from botbuilder.schema import Activity
 from quart import Quart
 from quart import request
 from quart import Response
@@ -13,7 +10,6 @@ from quart import Response
 from .auth import get_secret  # Adjusted import statement to relative import
 from .utils import log_debug_info
 from .utils import log_message
-
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -28,12 +24,8 @@ CLU_PROJECT_NAME = get_secret('CLU-PROJECT-NAME')
 
 app = Quart(__name__)  # Using Quart instead of Flask
 
-# Initialize settings and adapter using configuration constants
-SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
-ADAPTER = AdapterWithErrorHandler(SETTINGS)
-
-# Dynamically import to avoid circular imports
-from bot import scrumbag_bot
+# Initialize settings using configuration constants
+# This avoids the need to import the bot directly here, reducing circular import risk
 
 @app.route('/api/messages', methods=['POST'])
 async def messages():
@@ -45,18 +37,16 @@ async def messages():
         body = await request.get_json()  # Asynchronously get JSON data
         logger.info(f"Processing message with body: {body}")
 
+        # Avoid direct import of bot to prevent circular imports
+        # Import dynamically when it's actually needed inside the function
+        from bot import scrumbag_bot
+
         activity = Activity().deserialize(body)
         auth_header = request.headers.get('Authorization', '')
 
-        await ADAPTER.process_activity(activity, auth_header, scrumbag_bot.on_turn)
+        await scrumbag_bot.process_activity(activity, auth_header)
         logger.info('Request processed successfully')
         return Response('Handled', status=HTTPStatus.CREATED)
-    except KeyError as e:
-        logger.exception('Key error in processing the request', exc_info=True)
-        return Response(f'Key error: {str(e)}', status=HTTPStatus.BAD_REQUEST)
-    except ValueError as e:
-        logger.exception('Value error in processing the request', exc_info=True)
-        return Response(f'Value error: {str(e)}', status=HTTPStatus.BAD_REQUEST)
     except Exception as e:
         logger.exception('Failed to process message', exc_info=True)
         return Response('Internal server error', status=HTTPStatus.INTERNAL_SERVER_ERROR)

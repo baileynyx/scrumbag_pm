@@ -4,6 +4,7 @@ import os
 import sys
 from pathlib import Path
 
+# Ensure that the root directory is added to sys.path for module resolution
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 
@@ -36,6 +37,11 @@ async def query_clu(text: str):
     return response.json()
 
 class scrumbag_bot(ActivityHandler):
+    def __init__(self, settings=None):
+        self.settings = settings
+        super().__init__()
+
+
     async def on_message_activity(self, turn_context: TurnContext):
         user_message = turn_context.activity.text
         log_message('info', f"Received message: {user_message}")
@@ -62,4 +68,6 @@ class scrumbag_bot(ActivityHandler):
             log_message('error', f"Error sending activity: {str(e)}", exc_info=True)
 
 if __name__ == '__main__':
+    # Ensure no arguments are passed unless explicitly handled in the __init__
+    bot = scrumbag_bot()
     app.run(debug=False, port=3978, use_reloader=False)

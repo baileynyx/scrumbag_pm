@@ -1,6 +1,7 @@
 # app.py
 from __future__ import annotations
 
+import logging
 from http import HTTPStatus
 
 from adapter import AdapterWithErrorHandler
@@ -11,8 +12,13 @@ from quart import request
 from quart import Response
 
 from bot import scrumbag_bot  # Make sure this import doesn't trigger further imports that circle back
+from shared.config import CLU_ENDPOINT
+from shared.config import CLU_SECRET
 from shared.config import MICROSOFT_APP_ID
 from shared.config import MICROSOFT_APP_PASSWORD
+
+
+logging.basicConfig(level=logging.INFO)
 
 app = Quart(__name__)
 SETTINGS = BotFrameworkAdapterSettings(MICROSOFT_APP_ID, MICROSOFT_APP_PASSWORD)
@@ -50,4 +56,6 @@ async def messages():
         return Response('Internal server error', status=HTTPStatus.INTERNAL_SERVER_ERROR)
 
 if __name__ == '__main__':
+    settings = {'endpoint': CLU_ENDPOINT, 'secret': CLU_SECRET}  # Example settings structure
+    bot = scrumbag_bot(settings)
     app.run(debug=False, port=3978, use_reloader=False)
