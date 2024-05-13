@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.2...v1.3.3) (2024-05-13)
+
+
+### Bug Fixes
+
+* imports ([0a52eb9](https://github.com/baileynyx/scrumbag_pm/commit/0a52eb977602372b6fe8408bb55f45a241f86db8))
+
 ## [1.3.2](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.1...v1.3.2) (2024-05-10)
 
 
