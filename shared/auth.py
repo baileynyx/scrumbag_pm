@@ -1,15 +1,31 @@
 from __future__ import annotations
 
+import os
+
 import requests
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
+from dotenv import load_dotenv
 
 from .utils import log_debug_info
 from .utils import log_message
 
 
 # Initialize the Azure Key Vault client
-key_vault_url = 'https://<your-key-vault-name>.vault.azure.net/'
+# Load environment variables
+load_dotenv()
+
+# Retrieve the Key Vault name from the environment variable
+key_vault_name = os.getenv('AZURE_KEY_VAULT_NAME')
+
+# Ensure the Key Vault name is provided
+if not key_vault_name:
+    raise Exception('Key Vault name not specified in the environment variables')
+
+# Construct the Key Vault URL
+key_vault_url = f'https://{key_vault_name}.vault.azure.net/'
+
+# Initialize the Azure credentials and the Key Vault client
 credential = DefaultAzureCredential()
 client = SecretClient(vault_url=key_vault_url, credential=credential)
 

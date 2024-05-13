@@ -20,11 +20,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Retrieve secrets from Azure Key Vault
-MICROSOFT_APP_ID = get_secret('MICROSOFT_APP_ID')
-MICROSOFT_APP_PASSWORD = get_secret('MICROSOFT_APP_PASSWORD')
-CLU_ENDPOINT = get_secret('CLU_ENDPOINT')
-CLU_SECRET = get_secret('CLU_SECRET')
-CLU_PROJECT_NAME = get_secret('CLU_PROJECT_NAME')
+MICROSOFT_APP_ID = get_secret('APP-ID')
+MICROSOFT_APP_PASSWORD = get_secret('APP-PASSWORD')
+CLU_ENDPOINT = get_secret('CLU-ENDPOINT')
+CLU_SECRET = get_secret('CLU-SECRET')
+CLU_PROJECT_NAME = get_secret('CLU-PROJECT-NAME')
 
 app = Quart(__name__)  # Using Quart instead of Flask
 
