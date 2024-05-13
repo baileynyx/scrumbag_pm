@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.3...v1.3.4) (2024-05-13)
+
+
+### Bug Fixes
+
+* resolve circular import in config.py ([8f4ec38](https://github.com/baileynyx/scrumbag_pm/commit/8f4ec38b2cd7b09ac06be2b8f279429312153ba1))
+
 ## [1.3.3](https://github.com/baileynyx/scrumbag_pm/compare/v1.3.2...v1.3.3) (2024-05-13)
 
 
