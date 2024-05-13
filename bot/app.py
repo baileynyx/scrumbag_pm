@@ -6,6 +6,7 @@ from http import HTTPStatus
 
 from adapter import AdapterWithErrorHandler
 from botbuilder.core import BotFrameworkAdapterSettings
+from botbuilder.schema import Activity
 from quart import jsonify
 from quart import Quart
 from quart import request
