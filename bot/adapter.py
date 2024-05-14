@@ -3,23 +3,28 @@ from __future__ import annotations
 import logging
 
 from botbuilder.core import BotFrameworkAdapter
-from botbuilder.core import BotFrameworkAdapterSettings
 from botbuilder.core import TurnContext
 from botbuilder.schema import Activity
 from botbuilder.schema import ConversationReference
 
-# Configure logging
+# Configure logger for adapter-related operations
 logger = logging.getLogger(__name__)
-
+logging.basicConfig(level=logging.DEBUG)
 
 class AdapterWithErrorHandler(BotFrameworkAdapter):
-    def __init__(self, settings: BotFrameworkAdapterSettings):
+    """
+    Custom adapter class for the Bot Framework that includes error handling.
+    """
+
+    def __init__(self, settings):
         super().__init__(settings)
         # Catch-all for errors in the adapter process
         self.on_turn_error = self.handle_turn_error
 
     async def handle_turn_error(self, turn_context: TurnContext, error: Exception):
-        # Log any errors that happen during the turn
+        """
+        Handles any uncaught exceptions during the turn processing.
+        """
         logger.error(f"Unhandled exception: {error}", exc_info=True)
 
         # Send a message to the user
@@ -29,24 +34,26 @@ class AdapterWithErrorHandler(BotFrameworkAdapter):
         await self.clear_state(turn_context)
 
     async def clear_state(self, turn_context: TurnContext):
+        """
+        Clears the conversation state.
+        """
         try:
-            # Delete the conversation state for the current context
             await turn_context.adapter.conversation_state.delete(turn_context)
         except Exception as e:
-            logger.exception(
-                'Exception occurred when trying to clear conversation state.', exc_info=True,
-            )
+            logger.exception('Exception occurred when trying to clear state.', exc_info=True)
 
-    # Optionally, override other methods to add more specific logging
     async def send_activities(self, context: TurnContext, activities: list[Activity]):
-        # Log activities being sent
+        """
+        Override the send_activities method to add custom logging.
+        """
         for activity in activities:
             if activity.type == 'message':
                 logger.info(f"Sending message: {activity.text}")
         return await super().send_activities(context, activities)
 
     async def continue_conversation(self, reference: ConversationReference, callback, bot_id: str = None):
-        logger.info(f"Continuing conversation with reference: {
-                    reference.conversation.id
-        }")
+        """
+        Continues a conversation using a reference.
+        """
+        logger.info(f"Continuing conversation with reference: {reference.conversation.id}")
         return await super().continue_conversation(reference, callback, bot_id=bot_id)

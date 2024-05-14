@@ -6,70 +6,69 @@ from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
 from dotenv import load_dotenv
-
+# Load environment configurations if available in .env file
 load_dotenv()
 
+# Function to ensure the existence of a directory for logging
 def ensure_dir(file_path):
+    """
+    Ensures that the directory for a given file path exists. If the directory does not exist, it is created.
+
+    Args:
+    file_path (str): The file path for which the directory is checked.
+    """
     directory = os.path.dirname(file_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
+        logging.info(f"Directory created at {directory}")
 
+# Define whether to log debug messages, influenced by the environment variable 'DEBUG'
 DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
 
-# Modify the timestamp to include only the date and hour for log rollover
+# Configure the timestamp format to be used in the log file naming
 timestamp = datetime.now().strftime('%Y%m%d%H')
-# This sets the log directory to 'logs/YYYYMMDDHH'
+
+# Set the log directory based on the current date and hour
 log_directory = os.path.join('logs', timestamp)
 ensure_dir(log_directory)
 
-# Modify the log file name to include only the date
+# Set the log file name within the log directory
 log_file = os.path.join(log_directory, 'scrumbag.log')
-# Ensure the log directory exists
-ensure_dir(log_file)
+ensure_dir(log_file)  # Ensure the log file's directory exists
 
-# Configure logger
+# Configure the logger
 logger = logging.getLogger('scrumbag_logger')
-logger.setLevel(
-    logging.DEBUG if DEBUG else getattr(
-        logging, LOG_LEVEL, logging.INFO,
-    ),
-)
+logger.setLevel(getattr(logging, LOG_LEVEL, logging.DEBUG))
 
-# Create a file handler which logs messages
-# Set 'when' to 'H' for hourly rollover and 'midnight' for daily rollover
-file_handler = TimedRotatingFileHandler(
-    log_file, when='H', interval=1, backupCount=24,
-)  # Keep last 24 hours of logs
+# Create a file handler which logs even debug messages
+file_handler = TimedRotatingFileHandler(log_file, when='H', interval=1, backupCount=24)
 file_handler.suffix = '%Y%m%d%H'  # Suffix for the log file name
-file_handler.setFormatter(
-    logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    ),
-)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
 # Add the handler to the logger
 logger.addHandler(file_handler)
 
-
 def log_message(level, message):
-    """Logs a message with the given level."""
-    # Note that for debug level, we might avoid logging it in production
+    """
+    Logs a message at the specified level.
+
+    Args:
+    level (str): The log level at which to log the message ('info', 'debug', etc.).
+    message (str): The message to log.
+    """
     getattr(logger, level.lower(), logger.info)(message)
 
-
 def log_debug_info(message, **kwargs):
-    """Logs debug information without sensitive details."""
+    """
+    Logs detailed debug information without sensitive data.
+
+    Args:
+    message (str): A descriptive message to be logged.
+    **kwargs: Additional details provided as key-value pairs, filtered to ensure no sensitive information is logged.
+    """
     if not DEBUG:
-        # In production, you might want to skip debug messages entirely
-        return
-    # Filter out any sensitive data from kwargs before logging
-    filtered_kwargs = {
-        k: v for k, v in kwargs.items() if k not in [
-            'client_secret', 'client_id',
-        ]
-    }
-    details = ', '.join(
-        f'{key}={value}' for key, value in filtered_kwargs.items()
-    )
+        return  # Skip debug logging if DEBUG is False
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['client_secret', 'client_id']}
+    details = ', '.join(f"{key}={value}" for key, value in filtered_kwargs.items())
     logger.debug(f"{message} - {details}")

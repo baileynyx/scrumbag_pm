@@ -1,58 +1,40 @@
 from __future__ import annotations
 
-import os
+import logging
 import sys
 from pathlib import Path
 
-# Ensure that the root directory is added to sys.path for module resolution
+from botbuilder.core import ActivityHandler
+from botbuilder.core import MessageFactory
+from botbuilder.core import TurnContext
+
+# Adjust the path to include the root directory of the project
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 
-# Import configurations directly to avoid circular imports
-from shared.config import CLU_ENDPOINT, CLU_SECRET, CLU_PROJECT_NAME
+from shared.config import CLU_ENDPOINT, CLU_SECRET, MICROSOFT_APP_ID
 from shared.utils import log_message, log_debug_info
+import requests  # Used for making HTTP calls
 
-import logging
-from botbuilder.core import ActivityHandler, MessageFactory, TurnContext
-import requests  # Import requests to make HTTP calls to the CLU service
+# Configure logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-# Configure logger for EnhancedBot using the shared utility logger
-logger = logging.getLogger('EnhancedBotLogger')
-
-# Function to query the CLU service
-async def query_clu(text: str):
-    endpoint_url = CLU_ENDPOINT  # Use the endpoint from the config
-    headers = {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': CLU_SECRET  # Use the secret from the config
-    }
-    body = {
-        'query': text,
-        'projectName': CLU_PROJECT_NAME,  # Use the CLU project name from the config
-        'deploymentName': 'production'
-    }
-    log_debug_info('Sending request to CLU', endpoint=endpoint_url, project_name=CLU_PROJECT_NAME)
-    response = requests.post(endpoint_url, json=body, headers=headers)
-    log_message('info', f"Received CLU response: {response.json()}")
-    return response.json()
-
-class scrumbag_bot(ActivityHandler):
-    def __init__(self, settings=None):
-        self.settings = settings
-        super().__init__()
-
+class ScrumBagBot(ActivityHandler):
+    """
+    Bot handler class for processing user messages.
+    """
 
     async def on_message_activity(self, turn_context: TurnContext):
+        """
+        Handles message activities from users.
+        """
         user_message = turn_context.activity.text
         log_message('info', f"Received message: {user_message}")
 
-        # Query CLU with the user message
-        clu_response = await query_clu(user_message)
-        log_message('info', f"CLU Response: {clu_response}")
-
-        # Handle different intents based on the CLU response
-        intent = clu_response.get('prediction', {}).get('topIntent', {}).get('intent', 'None')
-        log_message('debug', f"Handling intent: {intent}")
+        # Process the message and query CLU with the user's message
+        response = await self.query_clu(user_message)
+        intent = response.get('topIntent', {}).get('intent', 'None')
 
         if intent == 'Greeting':
             response_text = 'Hello there! How can I assist you today?'
@@ -61,13 +43,52 @@ class scrumbag_bot(ActivityHandler):
         else:
             response_text = "I'm here to help, but I didn't quite understand that."
 
-        try:
-            await turn_context.send_activity(MessageFactory.text(response_text))
-            log_message('info', f"Sent response: {response_text}")
-        except Exception as e:
-            log_message('error', f"Error sending activity: {str(e)}", exc_info=True)
+        # Send a reply to the user
+        await turn_context.send_activity(MessageFactory.text(response_text))
+        log_message('info', f"Sent response: {response_text}")
+
+    async def query_clu(self, text: str):
+        """
+        Query the CLU service with the provided text and return the response.
+        """
+        endpoint_url = f"{CLU_ENDPOINT}/analyze"
+        headers = {
+            'Content-Type': 'application/json',
+            'Ocp-Apim-Subscription-Key': CLU_SECRET
+        }
+        body = {
+            'query': text,
+            'projectName': MICROSOFT_APP_ID,
+            'deploymentName': 'production'
+        }
+        response = requests.post(endpoint_url, json=body, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"Failed to query CLU: {response.text}")
+            return {}
 
 if __name__ == '__main__':
-    # Ensure no arguments are passed unless explicitly handled in the __init__
-    bot = scrumbag_bot()
+    from quart import Quart, request
+
+    app = Quart(__name__)
+
+    @app.route('/api/messages', methods=['POST'])
+    async def messages():
+        """
+        Main endpoint for processing messages from users.
+        """
+        if 'application/json' not in request.headers.get('Content-Type', ''):
+            return Response('Unsupported Media Type', HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
+
+        body = await request.get_json()
+        activity = Activity.deserialize(body)
+        adapter = BotFrameworkAdapter(settings)
+        turn_context = TurnContext(adapter, activity)
+
+        bot = ScrumBagBot()
+        await bot.on_turn(turn_context)
+
+        return 'Message processed', HTTPStatus.OK
+
     app.run(debug=False, port=3978, use_reloader=False)
